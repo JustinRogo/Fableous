@@ -5,7 +5,7 @@
 // the audio clock, never against timers, so the rhythm holds even when the
 // page is busy drawing.
 
-import { SAMPLE_RATE, renderBell } from './bell.js';
+import { SAMPLE_RATE, renderBell, rowStart } from './bell.js';
 
 // Where each bell stands, left to right, as if you were in the ringing room
 // with the treble on your left and the tenor on your right.
@@ -179,7 +179,7 @@ export class Tower {
       return buf;
     });
     rows.forEach((row, k) => {
-      const t0 = 0.05 + (k * 4 + Math.floor(k / 2)) * beat;
+      const t0 = 0.05 + rowStart(k) * beat;
       for (let place = 0; place < 4; place++) {
         const bell = row.charCodeAt(place) - 49;
         const src = off.createBufferSource();

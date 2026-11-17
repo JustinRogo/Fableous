@@ -4,7 +4,7 @@
 // them. Each check is something a wrong synthesiser would fail.
 
 import assert from 'node:assert/strict';
-import { SAMPLE_RATE, STRIKE_HZ, recipe, renderBell, rowStart } from '../js/bell.js';
+import { SAMPLE_RATE, STRIKE_HZ, recipe, renderBell, rowSpan, rowStart } from '../js/bell.js';
 
 let passed = 0;
 const test = (name, fn) => {
@@ -115,7 +115,12 @@ test('every bell is the same bell each time it is cast', () => {
 
 console.log('the rhythm');
 test('rows are four beats long with one beat of gap after each backstroke', () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map((k) => rowSpan(k)), [4, 5, 4, 5, 4, 5]);
   assert.deepEqual([0, 1, 2, 3, 4, 5].map((k) => rowStart(k)), [0, 4, 9, 13, 18, 22]);
+});
+test('an extent with its rounds before and after is 28 rows and 125 beats', () => {
+  // Two rows of rounds, 24 changes, two more of rounds; the last row is four beats.
+  assert.equal(rowStart(27) + 4, 125);
 });
 
 const t0 = performance.now();

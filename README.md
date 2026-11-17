@@ -49,6 +49,7 @@ Pages serves the files as they are.
 | | |
 |---|---|
 | `index.html`, `css/style.css` | the page |
+| `journal.html`, `js/journal.js` | the journal, set as a page |
 | `js/rows.js` | the arithmetic: rows, changes, the catalogue of 10,792, the eleven named methods, the solid's coordinates. No DOM. |
 | `js/solid.js` | the solid, drawn in SVG, and used as the controller |
 | `js/leaf.js` | the rows set down the page with the red and blue lines |
@@ -71,9 +72,14 @@ node test/rows.test.mjs
 node test/bell.test.mjs
 ```
 
+```bash
+node test/journal.test.mjs
+```
+
 The first asserts the figures quoted on the page (10,792; 162; the eleven;
 the geometry of the solid). The second measures the synthesised bells,
-because the author cannot listen to them.
+because the author cannot listen to them. The third checks the small
+Markdown reader that sets the journal.
 
 ## Sources and credits
 

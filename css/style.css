@@ -13,7 +13,7 @@
   --veil: 0.7;
   --serif: 'EB Garamond', 'IM Fell English', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --caps: 'EB Garamond', 'IM Fell English SC', 'IM Fell English', 'Iowan Old Style', Palatino, Georgia, serif;
-  --display: 'IM Fell French Canon', 'IM Fell English', 'Iowan Old Style', Palatino, Georgia, serif;
+  --display: 'EB Garamond', 'IM Fell French Canon', 'IM Fell English', 'Iowan Old Style', Palatino, Georgia, serif;
   color-scheme: light dark;
 }
 
@@ -430,6 +430,7 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .atlas h2 {
   margin: 0 0 14px;
   text-align: center;
+  text-wrap: balance;
   font: 400 32px/1.2 var(--display);
   letter-spacing: 0.04em;
 }
@@ -503,11 +504,35 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 }
 .art p { margin: 0; text-indent: 1.4em; }
 .art h2 + p, .art h3 + p { text-indent: 0; }
-.art h2 + p::first-letter {
+.art:not(.journal) h2 + p::first-letter {
   float: left;
   font: 400 3.5em/0.82 var(--display);
   padding: 0.06em 0.08em 0 0;
 }
+
+/* -------------------------------------------------------------- journal */
+
+.title h1 a { color: inherit; text-decoration: none; }
+.journal { margin-top: 0; padding-top: 0; border-top: 0; max-width: 36em; hyphens: manual; }
+.journal h2 { margin: 44px 0 14px; font-size: 27px; }
+.journal h2:first-child { margin-top: 8px; }
+.journal p + p { margin-top: 0; }
+.journal ul { margin: 10px 0; padding-left: 1.3em; }
+.journal li { margin: 0 0 6px; }
+.journal li::marker { color: var(--ink-3); }
+.journal ul + p, .journal table + p, .journal hr + p { text-indent: 0; margin-top: 10px; }
+.journal strong { font-weight: 400; font-style: italic; }
+.journal code {
+  font: 0.82em/1 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+  background: var(--paper-deep);
+  padding: 0.12em 0.3em;
+  border-radius: 2px;
+  overflow-wrap: anywhere;
+}
+.journal hr { border: 0; border-top: 1px solid var(--ink-4); margin: 24px 0; }
+.journal table { margin: 14px auto; border-collapse: collapse; font-size: 17px; }
+.journal th, .journal td { padding: 4px 16px; text-align: left; border-bottom: 1px solid var(--ink-4); }
+.journal th { font: 400 16px/1.4 var(--caps); letter-spacing: 0.05em; color: var(--ink-2); }
 .art .names-note {
   margin-top: 26px;
   text-indent: 0;
@@ -582,6 +607,11 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
     --ink-2: rgba(0, 0, 0, 0.7);
     --ink-3: rgba(0, 0, 0, 0.4);
     --ink-4: rgba(0, 0, 0, 0.18);
+    /* A browser may still be in its dark scheme when it prints. Without
+       these the lines would print in the pale dark-scheme colours on white. */
+    --red: #a63a22;
+    --blue: #27508f;
+    --veil: 0.7;
   }
   .changes, .actions, .settings, .shelf, .premise, .call, .tally, .span,
   .naming, .address, .art, .atlas, .foot, .colophon button, .pick button[aria-pressed='false'] { display: none !important; }

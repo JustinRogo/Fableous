@@ -8,6 +8,7 @@ import {
 import { Solid } from './solid.js';
 import { Leaf } from './leaf.js';
 import { Tower } from './audio.js';
+import { rowSpan } from './bell.js';
 import { Atlas, familyOf } from './atlas.js';
 
 const $ = (id) => document.getElementById(id);
@@ -495,7 +496,7 @@ function schedule() {
     tower.ringRow(perf.seq[k].row, perf.nextStart, beat);
     perf.times[k] = perf.nextStart;
     perf.beats[k] = beat;
-    perf.nextStart += 4 * beat + (k % 2 ? beat : 0);
+    perf.nextStart += rowSpan(k) * beat;
   }
 }
 
@@ -527,7 +528,7 @@ function follow() {
     const nxt = seq[k + 1];
     let bead = null;
     if (nxt && nxt.row !== item.row) {
-      const whole = 4 * beat + (k % 2 ? beat : 0);
+      const whole = rowSpan(k) * beat;
       bead = { from: INDEX.get(item.row), to: INDEX.get(nxt.row), t: smooth((into / whole - 0.3) / 0.7) };
     }
     solid.set({ path: perf.index.slice(0, item.leaf + 1), options: [], bead, done: false, canGoBack: false });

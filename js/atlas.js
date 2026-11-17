@@ -110,10 +110,33 @@ export class Atlas {
       b.addEventListener('focus', tell);
       b.addEventListener('blur', rest);
 
+      // One tab stop for the whole plate, not 162. The arrow keys move within it.
+      b.tabIndex = -1;
       this.cells.set(fam.first, b);
       frag.appendChild(b);
     }
     grid.replaceChildren(frag);
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', 'The 162 loops. Arrow keys move between them; Enter has the band ring one.');
+    this.order = [...this.cells.values()];
+    this.order[0].tabIndex = 0;
+
+    grid.addEventListener('keydown', (e) => {
+      const at = this.order.indexOf(document.activeElement);
+      if (at < 0) return;
+      const across = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+      const to = { ArrowRight: at + 1, ArrowLeft: at - 1, ArrowDown: at + across, ArrowUp: at - across, Home: 0, End: this.order.length - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      if (to < 0 || to >= this.order.length) return;
+      this.rove(this.order[to]);
+      this.order[to].focus();
+    });
+  }
+
+  // Make this cell the plate's one tab stop.
+  rove(cell) {
+    for (const c of this.order) c.tabIndex = c === cell ? 0 : -1;
   }
 
   describe(fam) {
@@ -137,6 +160,8 @@ export class Atlas {
     }
     for (const fam of this.list) this.cells.get(fam.first).setAttribute('aria-label', this.describe(fam));
     this.current = current;
+    // Tabbing into the plate lands on the loop that is on the solid, if one is.
+    if (current && !this.grid.contains(document.activeElement)) this.rove(this.cells.get(current));
     const n = found.size;
     this.resting =
       n === 0

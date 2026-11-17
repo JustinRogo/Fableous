@@ -120,10 +120,18 @@ export function renderBell(bell, sampleRate = SAMPLE_RATE) {
   return out;
 }
 
-// When each row of a performance begins, in beats from the start. Rows come
-// in pairs, handstroke then backstroke, and after every backstroke the band
-// leaves one beat of silence before the next handstroke: the handstroke gap.
-// It is what gives ringing its gait.
+// The rhythm. Rows come in pairs, handstroke then backstroke, and after every
+// backstroke the band leaves one beat of silence before the next handstroke:
+// the handstroke gap. It is what gives ringing its gait.
+//
+// rowSpan: beats from the start of row k to the start of the row after it.
+// rowStart: beats from the start of the ringing to the start of row k.
+// Everything that schedules a strike goes through these two.
+export function rowSpan(k, bells = 4) {
+  return bells + (k % 2 ? 1 : 0);
+}
 export function rowStart(k, bells = 4) {
-  return k * bells + Math.floor(k / 2);
+  let beats = 0;
+  for (let i = 0; i < k; i++) beats += rowSpan(i, bells);
+  return beats;
 }

@@ -198,9 +198,11 @@ and the length of the hum.
 
 ## 7. The figure 1 is a capital I
 
-I chose the Fell types because they are the right types: cut for the
-Oxford press in the 1670s, the same decade as *Tintinnalogia*. The first
-time the page rendered I saw the problem at once. In old-style Fell
+I chose the Fell types because they are the right types: Bishop John Fell
+bought them for the Oxford press in 1670 and 1672
+([Fonts In Use](https://www.fontsinuse.com/typefaces/47225/fell-types)),
+within four years of *Tintinnalogia* (1668). The first time the page
+rendered I saw the problem at once. In old-style Fell
 figures the 1 is drawn like a small capital I. Rounds read "I234", the
 catalogue was "IO,792" extents, and the first peal was in "I7I5".
 
@@ -349,3 +351,50 @@ commit in small pieces partly for this. Nothing was lost either time.
 - A real phone. I used a 375-pixel viewport with mouse clicks, not a finger.
 - Paper. The print sheet was checked by applying its rules to the screen,
   not by printing.
+
+## 15. A second pair of eyes
+
+Before calling it done I had the work reviewed. Five catches, all fair:
+
+- **A lint warning I had dismissed was right.** A design linter flagged
+  pale blue on white as too low in contrast. I checked, saw that the pale
+  blue is the dark-scheme colour and is only ever drawn on a dark ground,
+  and called it a false positive. But the print rules reset the paper to
+  white without resetting the two colours, so a browser that prints while
+  in its dark scheme would have printed the blue line pale on white. My
+  print check ran in the light scheme and could not have shown it. Fixed,
+  and a note to self: "that pair of colours never meets" is a claim about
+  every stylesheet rule, not just the ones I was thinking of.
+- **Entry 7 said the Fell types were from "the 1670s, the same decade as
+  *Tintinnalogia*"**, a book I date to 1668 everywhere else. I had sourced
+  every ringing fact and typed the typography from memory. Now sourced.
+- **The plate added 162 tab stops** between the instrument and everything
+  after it. It is now one stop, and the arrow keys move within it.
+- **The rhythm had one test and two other copies.** The handstroke gap was
+  tested in `bell.js` and then written out again by hand in the two places
+  that schedule sound. One definition now, used by both.
+- **The footer linked to the raw `JOURNAL.md`**, which my development
+  server sends as plain text and another server might offer as a download.
+  So the journal has a page of its own, set by a small Markdown reader
+  written for exactly the constructs this file uses. Setting it turned up
+  one more thing about the type: Fell draws a straight double quote as a
+  closing quote, so "this" came out with two closing quotes. The reader
+  curls them.
+
+## 16. Next
+
+If I kept going, in this order:
+
+1. **Have someone listen.** Then tune the partial levels and the hum by
+   ear, which is the one thing about this I could not do.
+2. **Five bells.** 120 rows on a four-dimensional solid. It cannot be held
+   in the hand the way this one can, and I would want to find out whether a
+   shadow of it turning is still a map or only a spectacle. Five is also
+   where ringing gets its real history: Grandsire and Stedman are answers to
+   exactly the puzzle this page poses, one size up.
+3. **Ring a bell yourself.** Take one rope and keep your place in time while
+   the band rings the rest. It would teach what the blue line is for.
+4. **Say more about each loop.** The plate shows 162 shapes and says little
+   about why they differ. Which have a hunt bell, which are palindromes,
+   which are one belt stitched to another: the symmetries are there in the
+   arithmetic and could be shown.
