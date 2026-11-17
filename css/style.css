@@ -517,7 +517,8 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .journal h2 { margin: 44px 0 14px; font-size: 27px; }
 .journal h2:first-child { margin-top: 8px; }
 .journal p + p { margin-top: 0; }
-.journal ul { margin: 10px 0; padding-left: 1.3em; }
+.journal ul, .journal ol { margin: 10px 0; padding-left: 1.3em; }
+.journal ol + p { text-indent: 0; margin-top: 10px; }
 .journal li { margin: 0 0 6px; }
 .journal li::marker { color: var(--ink-3); }
 .journal ul + p, .journal table + p, .journal hr + p { text-indent: 0; margin-top: 10px; }

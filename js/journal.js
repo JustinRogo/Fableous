@@ -24,7 +24,8 @@ function inline(text) {
     keep(`<a href="${escape(url)}" rel="noopener">${escape(quotes(label))}</a>`)
   );
   s = escape(quotes(s));
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // Strong first and as short as it can be, so emphasis may sit inside it.
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   return s.replace(/\u0000(\d+)\u0000/g, (_, i) => kept[Number(i)]);
 }
@@ -66,10 +67,18 @@ export function render(markdown) {
         items.push(`<li>${inline(item)}</li>`);
       }
       out.push('<ul>' + items.join('') + '</ul>');
+    } else if (/^\d+\. /.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        let item = lines[i++].replace(/^\d+\. /, '');
+        while (i < lines.length && /^ {2,}\S/.test(lines[i])) item += ' ' + lines[i++].trim();
+        items.push(`<li>${inline(item)}</li>`);
+      }
+      out.push('<ol>' + items.join('') + '</ol>');
     } else {
       let para = line;
       i++;
-      while (i < lines.length && !blank(lines[i]) && !/^(#{1,3} |- |\||---+$)/.test(lines[i])) para += ' ' + lines[i++].trim();
+      while (i < lines.length && !blank(lines[i]) && !/^(#{1,3} |- |\d+\. |\||---+$)/.test(lines[i])) para += ' ' + lines[i++].trim();
       out.push(`<p>${inline(para)}</p>`);
     }
   }

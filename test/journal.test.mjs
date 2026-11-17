@@ -34,6 +34,12 @@ test('emphasis, code and links', () => {
 test('list items run on over indented lines', () => {
   assert.equal(render('- one\n  still one\n- two\n\nafter'), '<ul><li>one still one</li><li>two</li></ul>\n<p>after</p>');
 });
+test('numbered lists', () => {
+  assert.equal(render('1. **First.** Then\n   more.\n2. Second.\n'), '<ol><li><strong>First.</strong> Then more.</li><li>Second.</li></ol>');
+});
+test('emphasis may sit inside strong', () => {
+  assert.equal(render('**It said "as *Tintinnalogia*"**, a book.'), '<p><strong>It said “as <em>Tintinnalogia</em>”</strong>, a book.</p>');
+});
 test('tables', () => {
   const html = render('| a | b |\n|---|---|\n| `x` | both |\n');
   assert.equal(html, '<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td><code>x</code></td><td>both</td></tr></tbody></table>');
@@ -60,7 +66,8 @@ test('every entry becomes a heading, in order', () => {
 });
 test('no Markdown is left showing', () => {
   const text = html.replace(/<code>.*?<\/code>/g, '').replace(/<[^>]+>/g, '');
-  assert.ok(!text.includes('**'), 'stray ** in: ' + (text.match(/.{0,40}\*\*.{0,40}/) || [''])[0]);
+  assert.ok(!text.includes('*'), 'stray * in: ' + (text.match(/.{0,40}\*.{0,40}/) || [''])[0]);
+  assert.ok(!/<p>\d+\. /.test(html), 'a numbered list was set as a paragraph');
   assert.ok(!/\]\(http/.test(text), 'stray link syntax');
   assert.ok(!/^#+ /m.test(text), 'stray heading marks');
   assert.ok(!/^\s*\|/m.test(text), 'stray table row');
