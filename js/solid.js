@@ -2,7 +2,7 @@
 // drawn as a plate and used as the controller. You stand on a corner; the
 // solid turns under you so that where you are is always facing you.
 
-import { ROWS, LINKS, FACES, CHANGES, position } from './rows.js';
+import { ROWS, LINKS, FACES, CHANGES, NEXT, position } from './rows.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const make = (name, attrs, parent) => {
@@ -90,6 +90,8 @@ const LINK_FACES = LINKS.map((l) =>
 const CORNER_FACES = ROWS.map((_, v) =>
   FACE.map((f, i) => (f.verts.includes(v) ? i : -1)).filter((i) => i >= 0)
 );
+// The four rows one change away from each row.
+const NEIGHBOURS = NEXT;
 const linkKey = (a, b) => (a < b ? a * 24 + b : b * 24 + a);
 const LINK_AT = new Map(LINKS.map((l, i) => [linkKey(l.a, l.b), i]));
 
@@ -101,7 +103,7 @@ export class Solid {
     this.onStep = onStep || (() => {});
     this.reducedMotion = reducedMotion;
 
-    svg.setAttribute('viewBox', '-290 -290 580 580');
+    svg.setAttribute('viewBox', '-262 -262 524 524');
 
     // Start with rounds held at the front, and the square it sits on squared
     // up, so the first cross reads as a diagonal.
@@ -349,24 +351,47 @@ export class Solid {
       show.setAttribute('cy', p.y.toFixed(1));
       show.setAttribute('r', ((r * p.k) / SCALE).toFixed(2));
 
-      // The row's name, pushed outward from the centre so it clears the corner.
+      // The row's name, set beside its corner on the side away from the
+      // middle of the plate. Rows seen nearly edge-on are left unnamed.
       const label = this.labelEls[v];
-      if (!isFront) {
+      const facing = p.z / Math.sqrt(5);
+      if (!isFront || facing < 0.08) {
         label.setAttribute('display', 'none');
       } else {
         label.removeAttribute('display');
-        const push = 1.135 + (v === here ? 0.03 : 0);
-        const lp = this.#project([POS[v][0] * push, POS[v][1] * push, POS[v][2] * push]);
-        label.setAttribute('x', lp.x.toFixed(1));
-        label.setAttribute('y', (lp.y + 5).toFixed(1));
+        let dx = p.x;
+        let dy = p.y;
+        let reach = 15;
+        if (v === here && !bead) {
+          // Where you stand, the ways out crowd round: go where they are not.
+          dx = 0;
+          dy = 0;
+          for (const o2 of NEIGHBOURS[v]) {
+            const q = P[o2];
+            const len = Math.hypot(q.x - p.x, q.y - p.y) || 1;
+            dx -= (q.x - p.x) / len;
+            dy -= (q.y - p.y) / len;
+          }
+          reach = v === home ? 31 : 26;
+        }
+        const len = Math.hypot(dx, dy);
+        if (len < 0.35) {
+          dx = 0;
+          dy = 1;
+        } else {
+          dx /= len;
+          dy /= len;
+        }
+        // Names are wider than they are tall, so stand further off sideways.
+        const off = reach + 9 * Math.abs(dx);
+        label.setAttribute('x', (p.x + dx * off).toFixed(1));
+        label.setAttribute('y', (p.y + dy * off + 5).toFixed(1));
         let lc = 'row-label';
         if (v === here && !bead) lc += ' here';
         else if (o) lc += o.state === 'rung' ? ' shut' : ' open';
         else if (visited.has(v)) lc += ' rung';
-        // Rows near the edge of the disc are seen nearly side-on; let them recede.
-        const facing = Math.max(0, Math.min(1, (p.z / Math.sqrt(5) + 0.25) / 0.9));
         label.setAttribute('class', lc);
-        label.style.opacity = (0.25 + 0.75 * facing).toFixed(2);
+        label.style.opacity = Math.min(1, 0.3 + (facing - 0.08) * 2.2).toFixed(2);
       }
 
       const hit = this.hitEls[v];
