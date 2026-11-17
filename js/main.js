@@ -455,8 +455,17 @@ function ring() {
     seq.push({ row: ROUNDS, leaf: v.n }, { row: ROUNDS, leaf: v.n });
   }
 
+  // What is being rung, to say while it is rung.
+  let title = '';
+  if (v.extent && v.number) {
+    const id = identify(S.changes);
+    const mine = id ? null : nameOf(v.number);
+    title = id && id.offset === 0 ? `${id.method.name} Minimus.` : mine ? `${mine.name} Minimus.` : `No. ${say(v.number)}.`;
+  }
+
   perf = {
     seq,
+    title,
     index: v.rows.map((r) => INDEX.get(r)),
     round: v.round,
     n: v.n,
@@ -510,7 +519,7 @@ function follow() {
       perf.shown = key;
       leaf.setPlayhead({ row: item.leaf, strike });
       const closing = perf.round && item.leaf === perf.n;
-      setCall(k < 2 ? 'Look to. Treble’s going. She’s gone.' : closing ? 'That’s all.' : '', 'loud');
+      setCall(k < 2 ? 'Look to. Treble’s going. She’s gone.' : closing ? 'That’s all.' : perf.title, 'loud');
     }
 
     // Between this row and the next, a bead runs along the way taken. It

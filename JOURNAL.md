@@ -147,3 +147,205 @@ reactive notes, the count of extents still open, the URL hash), and
 `js/audio.js` (bells built from sine partials, rendered once per bell, with
 the handstroke gap). Nothing has been seen or heard yet, so nothing here is
 polished.
+
+## 6. Bells I cannot hear
+
+This is the uncomfortable part of the project and I would rather say so than
+write around it. I can see a screenshot. I cannot hear a bell. Everything
+about the sound was built from what is known about bells and then checked by
+measurement, never by ear.
+
+What I built on: a bell is not a harmonic instrument. Founders tune five
+named partials (hum, prime, tierce, quint, nominal) and the note you think
+you hear is mostly an agreement between them. The tierce is a *minor* third
+above the prime, which is the bittersweet thing that makes a bell sound like
+a bell and not like a chime bar. Low partials ring long, high ones are gone
+in a tenth of a second. So each bell here is a sum of decaying sines at
+those ratios, each split into a close pair so they beat slowly the way a
+slightly out-of-round casting does, plus a few milliseconds of filtered
+noise for the clapper. Each bell is rendered once at load into a buffer;
+a strike is that buffer played again.
+
+`test/bell.test.mjs` is my substitute for ears. It checks things a wrong
+synthesiser would fail: each bell starts and ends in silence, peaks within
+30 ms, decays steadily, contains its partials and not their neighbours, has
+a minor third and not a major one, and late in the note the hum has outlived
+the nominal.
+
+**It caught a real bug on its first run.** I generate each sine by
+recurrence (each sample from the two before it) because it is far cheaper
+than calling `sin` ten million times. I seeded the recurrence one sample
+late, so every partial started at sin(ω) instead of sin(0), and every
+strike began with a jump of about 13% of full scale. That is an audible
+click on every single blow, in an instrument that does nothing but strike.
+I would never have found it by looking.
+
+Rhythm: rows come in pairs, and after each second row English ringers leave
+one beat of silence, the handstroke gap. I confirmed the size of the gap
+from a source rather than trusting memory, then measured the scheduled
+strikes in the running page: rows alternate 0.94 s and 1.175 s apart at the
+default pace, which is four beats and five beats. A full extent takes 29.5
+seconds, which is what the essay says ("about half a minute").
+
+Levels: rendered offline through the same reverb and compressor, a whole
+extent first peaked between −6 and −8 dBFS, which is safe and a little
+timid. I raised the gain by 3 dB and measured again: peaks between −4 and
+−5.6 dBFS across the range of the pace slider, so it does not clip.
+
+What remains unverified is the only thing that matters about a sound:
+whether it is pleasant. Someone with ears should judge the partial levels
+and the length of the hum.
+
+## 7. The figure 1 is a capital I
+
+I chose the Fell types because they are the right types: cut for the
+Oxford press in the 1670s, the same decade as *Tintinnalogia*. The first
+time the page rendered I saw the problem at once. In old-style Fell
+figures the 1 is drawn like a small capital I. Rounds read "I234", the
+catalogue was "IO,792" extents, and the first peal was in "I7I5".
+
+Period-correct, and unreadable on a page that is mostly numbers. I set five
+candidates side by side in the browser and looked. The fix I kept: ask
+Google Fonts for a copy of EB Garamond containing *only the ten digits*
+(`&text=0123456789`) and list it first in the font stack. Browsers fall
+through per character, so digits come from Garamond and every letter stays
+Fell. One extra tiny request, no spans in the markup.
+
+Abandoned: Fell's own figures (above); Libre Caslon digits (right weight,
+too wide); switching the whole body to Garamond (clean, and all the
+character gone).
+
+## 8. The solid
+
+Things that changed once I could look at it:
+
+- **A veil.** A wireframe of 48 lines is a hairball. The near faces are
+  drawn as paper at 70% over the far side, so the back of the solid shows
+  through faintly. Every link and corner exists twice in the SVG, once under
+  the veil and once over, and only one of each pair is shown per frame.
+- **The cross is dotted.** Single swaps are edges and get hairlines. The
+  cross runs over a square face and gets a dotted line, so the two kinds of
+  move look as different as they are. Squares are tinted a shade deeper
+  than hexagons.
+- **Where to put the name of the row you are on.** First attempt: push it
+  outward from the centre of the solid. But the row you stand on faces you,
+  so "outward" is straight at the eye and the label sat on the dot. Second:
+  put it opposite the average direction of the four ways out. That put it
+  exactly on top of a way out whenever three of the four lay to one side.
+  Third, kept: sort the four ways out by angle, find the widest gap, set the
+  name in the middle of it.
+- **The solid turns under you.** Each step rolls the solid by the shortest
+  turn that brings the new row to the front. A consequence I had not thought
+  through: every corner of this solid is like every other, so from wherever
+  you stand the view is the same view. You are always in the same place and
+  the world comes to you. I like this more than I expected. It is the
+  ringer's situation: your rope is always in front of you.
+- **Going back the way you came.** Clicking the row you just left is a step
+  back. It felt wrong that it did nothing.
+
+One geometric fact I guessed early and only later tested: plain hunt (cross,
+middle, cross, middle...) is a *belt*. It crosses four of the six squares
+corner to corner and comes home after eight rows, missing the other two
+squares entirely, and those two are opposite each other. There are three
+such belts, one for each pair of opposite squares, at right angles. Plain
+Bob runs round one belt until the last moment and then steps across to the
+next. The belts are now in the tests.
+
+## 9. How much to tell the walker
+
+Most random walks on the solid trap themselves, so this needed deciding and
+not just building. I kept the rule from entry 3 (one number, shown after the
+step) and then measured whether it was kind enough. I simulated a walker who
+picks at random among rows not yet rung and steps back the moment the count
+of open extents hits zero. Over 4,000 runs they finish an extent after
+about **four** doomed steps. The risk of a doomed step is nil for the first
+three changes, climbs to about one in four around the middle, and falls
+away again. That is the right amount of friction: you feel your way, you
+are never lost for long, and finishing still means something.
+
+I did not show a count on each of the four changes before you choose. It
+would turn the walk into reading four numbers and picking a non-zero one.
+
+The plain-hunt case gets its own sentence, because I expect many people to
+find it first by accident: eight rows, home, sixteen unrung, and the hint to
+step back one and close differently. That hint is a fair description of
+what Plain Bob does.
+
+## 10. Found by using it
+
+- **Shared links were broken and I had "tested" them.** A finished extent
+  puts its number in the address. I checked this by changing the address in
+  an open page, which worked. A cold load did not: the first render ran
+  before the catalogue had been counted, saw no finished extent, and
+  dutifully cleared the address before anything had read it. Found only
+  because I reloaded for an unrelated reason.
+- **On a phone, the two things a walker needs most were a screen and a half
+  away.** Step back and the count of open extents lived in the side column,
+  which on a narrow screen falls below the solid. I moved the three controls
+  and a one-line status directly under the four changes. Solid, changes,
+  status and the way back now fit one phone screen.
+- **`touch-action: none` on the solid trapped the page.** The solid fills
+  the first screen of a phone, and a finger on it could not scroll. Now a
+  vertical drag scrolls and a sideways drag turns.
+- Pointing at a change button lights the way it leads on the solid. Cheap,
+  and it is what made the buttons and the solid feel like one control.
+
+## 11. The plate of 162
+
+I had told myself "one spine": the walk is the piece, and the catalogue
+exists only to give the walk meaning. Then, with the walk working, the
+number 162 was sitting in the essay as a bare claim, and I wanted to see
+them.
+
+So there is a plate: every one of the 162 families drawn as its loop on the
+solid, 18 across and 9 down, like a table of knots. They start as pale
+pencil. When you ring an extent by hand, its family is inked in. That is the
+whole mechanic, and I think it is the walk's memory, not a second feature.
+The deal I made with myself was: build it, look at it, and cut it if it was
+not good. It stayed.
+
+Details:
+
+- All 162 are drawn from one fixed side, so they can be compared. I found
+  the viewpoint by brute force: every direction, a degree at a time, keeping
+  the one from which the two closest corners look furthest apart.
+- Family sizes: 75 families of 96, 67 of 48, 11 of 24, 4 of 16, 2 of 12 and
+  3 of 8. The more symmetric the loop, the smaller its family.
+- The four families of 16 and the three of 8 are exactly the named methods:
+  each family of 16 is an X / Reverse X pair, and the three of 8 are the
+  Doubles. Ringers named some of the most symmetric loops there are, long
+  before anyone could have listed the rest. (Two families of 12 are smaller
+  than the families of 16 and, as far as this page knows, nameless.)
+
+## 12. Interruptions
+
+Twice the work stopped for reasons that were not the work: once on a usage
+limit mid-file, and once because the machine ran out of memory after six
+days of uptime. My page was using 11 MB and was not the cause, but for a few
+minutes every tool I had stopped answering and I could not tell that. I
+commit in small pieces partly for this. Nothing was lost either time.
+
+## 13. Not built
+
+- **More bells.** Five bells is 120 rows on a four-dimensional solid. The
+  piece is about holding a whole space in view, and four is the last number
+  for which that is literally true.
+- **Ringing a bell yourself**, in time, following your line. That is the
+  real skill and would be a different instrument.
+- **A count on each change before you choose.** See entry 9.
+- **Recorded bells.** Would sound better. Would also mean shipping someone
+  else's tower, and the synthesis is half the point.
+- **A names registry.** You can name an extent and the name travels in the
+  link, but there is no server, so two people can name the same one.
+- **A browser for all 10,792.** The plate of 162 does that job honestly;
+  the other 10,630 are the same loops begun elsewhere.
+
+## 14. What I cannot vouch for
+
+- How it sounds. See entry 6.
+- Safari and Firefox. Everything was run in one Chromium-based pane.
+  Nothing used is exotic (SVG, Web Audio buffers, CSS grid), but I have not
+  seen it there.
+- A real phone. I used a 375-pixel viewport with mouse clicks, not a finger.
+- Paper. The print sheet was checked by applying its rules to the screen,
+  not by printing.
