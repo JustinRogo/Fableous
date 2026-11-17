@@ -9,6 +9,7 @@ import {
   apply, rowsOf, enumerateExtents, Catalogue, period, mirror, isPalindromic,
   canonical, identify, position, kin,
 } from '../js/rows.js';
+import { families, familyOf, FLAT } from '../js/atlas.js';
 
 let passed = 0;
 const test = (name, fn) => {
@@ -199,6 +200,75 @@ test('identify reports the offset', () => {
 });
 test('all eleven are palindromic', () => {
   for (const m of METHODS) assert.ok(isPalindromic(m.changes), m.name);
+});
+
+console.log('the plate of 162');
+const fams = families(cat);
+test('162 families that between them hold every extent once', () => {
+  assert.equal(fams.length, 162);
+  assert.equal(fams.reduce((s, f) => s + f.size, 0), cat.size);
+  for (let i = 1; i < fams.length; i++) assert.ok(fams[i].first > fams[i - 1].first);
+  assert.equal(fams[0].first, 1);
+});
+test('the eleven fall into seven families: four pairs and three alone', () => {
+  const named = fams.filter((f) => f.names.length);
+  assert.equal(named.length, 7);
+  assert.equal(named.filter((f) => f.names.length === 2).length, 4);
+  assert.equal(named.filter((f) => f.names.length === 1).length, 3);
+  for (const f of named.filter((x) => x.names.length === 1)) assert.ok(f.names[0].startsWith('Double'), f.names[0]);
+  const pairs = named.filter((x) => x.names.length === 2).map((f) => f.names.join(' + ')).sort();
+  assert.deepEqual(pairs, [
+    'Canterbury Place + Reverse Canterbury Place',
+    'Plain Bob + Reverse Bob',
+    'Single Court Place + Reverse Court Place',
+    'St Nicholas Bob + Reverse St Nicholas Bob',
+  ]);
+  assert.deepEqual(named.map((f) => f.size).sort((a, b) => a - b), [8, 8, 8, 16, 16, 16, 16]);
+});
+test('familyOf agrees with the list, from any member', () => {
+  for (const n of [0, 87, 4126, 10791]) {
+    const first = familyOf(cat, cat.get(n));
+    assert.ok(fams.some((f) => f.first === first));
+    assert.ok(first <= n + 1);
+  }
+});
+test('from the plate’s point of view no corner hides another', () => {
+  let least = Infinity;
+  for (let i = 0; i < 24; i++) {
+    for (let j = i + 1; j < 24; j++) least = Math.min(least, Math.hypot(FLAT[i].x - FLAT[j].x, FLAT[i].y - FLAT[j].y));
+  }
+  assert.ok(least > 0.6, 'closest pair of corners is ' + least.toFixed(3) + ' apart');
+});
+
+// Plain hunt on the solid. Not quoted on the page, but in the journal.
+test('plain hunt is a belt: it crosses four squares corner to corner, and the three hunts are at right angles', () => {
+  const squares = FACES.filter((f) => f.kind === 'square');
+  const centre = (f) => [0, 1, 2].map((k) => f.verts.reduce((s, v) => s + position(ROWS[v])[k], 0) / 4);
+  const axes = [];
+  const used = new Set();
+  for (let start = 0; start < 24; start++) {
+    if (used.has(start)) continue;
+    const course = [start];
+    for (let i = 0; i < 7; i++) course.push(NEXT[course[i]][i % 2]);
+    assert.equal(NEXT[course[7]][1], start); // eight rows and home
+    course.forEach((r) => used.add(r));
+    const touched = squares.filter((sq) => sq.verts.filter((v) => course.includes(v)).length > 0);
+    assert.equal(touched.length, 4);
+    for (const sq of touched) {
+      const mine = sq.verts.filter((v) => course.includes(v));
+      assert.equal(mine.length, 2);
+      assert.ok(near(dist(position(ROWS[mine[0]]), position(ROWS[mine[1]])), 2)); // opposite corners
+    }
+    const rest = squares.filter((sq) => !touched.includes(sq));
+    assert.equal(rest.length, 2);
+    const [a, b] = rest.map(centre);
+    assert.ok(near(a[0] + b[0], 0) && near(a[1] + b[1], 0) && near(a[2] + b[2], 0)); // opposite faces
+    axes.push(a);
+  }
+  assert.equal(axes.length, 3);
+  for (let i = 0; i < 3; i++) {
+    for (let j = i + 1; j < 3; j++) assert.ok(near(axes[i][0] * axes[j][0] + axes[i][1] * axes[j][1] + axes[i][2] * axes[j][2], 0));
+  }
 });
 
 // Figures quoted in the journal and the essay.

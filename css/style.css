@@ -420,6 +420,64 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .shelf .names button[aria-current='true'] { color: var(--red); border-bottom-color: var(--red); }
 .shelf .lot { font-style: italic; }
 
+/* ---------------------------------------------------------------- atlas */
+
+.atlas {
+  margin: 72px auto 0;
+  padding-top: 34px;
+  border-top: 3px double var(--ink-3);
+}
+.atlas h2 {
+  margin: 0 0 14px;
+  text-align: center;
+  font: 400 32px/1.2 var(--display);
+  letter-spacing: 0.04em;
+}
+.atlas-note {
+  max-width: 36em;
+  margin: 0 auto;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 17px;
+}
+.atlas-say {
+  margin: 14px 0 12px;
+  min-height: 1.5em;
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-2);
+}
+.loops {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  gap: 2px;
+}
+.loop {
+  aspect-ratio: 1;
+  padding: 4px;
+  color: var(--ink);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.loop svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.loop path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.loop .frame { stroke-width: 0.5px; stroke-opacity: 0.13; }
+.loop .far { stroke-width: 0.9px; stroke-opacity: 0.2; }
+.loop .near { stroke-width: 1.1px; stroke-opacity: 0.42; }
+.loop.found .far { stroke-width: 1.1px; stroke-opacity: 0.45; }
+.loop.found .near { stroke-width: 1.8px; stroke-opacity: 1; }
+.loop:hover { border-color: var(--ink-3); background: var(--paper-deep); }
+.loop:hover .near { stroke-opacity: 0.9; }
+.loop.current { border-color: var(--red); }
+
 /* ------------------------------------------------------------------ art */
 
 .art {
@@ -476,6 +534,7 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 /* ----------------------------------------------------------- narrower */
 
 @media (max-width: 1080px) {
+  .loops { grid-template-columns: repeat(12, minmax(0, 1fr)); }
   .work { grid-template-columns: auto minmax(300px, 560px); }
   .margin {
     grid-column: 1 / -1;
@@ -498,6 +557,9 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
   .leaf { order: 3; justify-self: center; margin-top: 26px; }
   .premise { font-size: 16px; }
   .art { margin-top: 52px; font-size: 18px; }
+  .atlas { margin-top: 52px; }
+  .atlas h2, .art h2 { font-size: 28px; }
+  .loops { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .change svg { width: 50px; height: 30px; }
   .change kbd { display: none; }
 }
@@ -522,7 +584,7 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
     --ink-4: rgba(0, 0, 0, 0.18);
   }
   .changes, .actions, .settings, .shelf, .premise, .call, .tally, .span,
-  .naming, .address, .art, .foot, .colophon button, .pick button[aria-pressed='false'] { display: none !important; }
+  .naming, .address, .art, .atlas, .foot, .colophon button, .pick button[aria-pressed='false'] { display: none !important; }
   .pick button { border: 0; color: var(--ink-2); }
   .work { grid-template-columns: auto 320px 1fr; gap: 24px; }
   .colophon { border-top: 0; margin-top: 0; padding-top: 0; }

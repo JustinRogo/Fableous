@@ -8,6 +8,7 @@ import {
 import { Solid } from './solid.js';
 import { Leaf } from './leaf.js';
 import { Tower } from './audio.js';
+import { Atlas, familyOf } from './atlas.js';
 
 const $ = (id) => document.getElementById(id);
 const say = (n) => n.toLocaleString('en-GB');
@@ -36,6 +37,19 @@ const names = (() => {
     return {};
   }
 })();
+
+// The families (of the 162) that have been rung here by hand, kept by the
+// catalogue number of each family's first member.
+const FOUND_KEY = 'extent.found';
+const found = (() => {
+  try {
+    return new Set((JSON.parse(localStorage.getItem(FOUND_KEY)) || []).filter(Number.isInteger));
+  } catch {
+    return new Set();
+  }
+})();
+let atlas = null;
+let atlasKey = '';
 
 const tower = new Tower();
 const solid = new Solid($('solid'), { onStep: (c) => step(c), onBack: () => back(), reducedMotion: reduced });
@@ -200,6 +214,15 @@ function render({ delay = 0, stagger = 0.2 } = {}) {
   colophon(v);
   address(v);
 
+  if (atlas) {
+    const family = v.extent && v.number ? familyOf(cat, S.changes) : 0;
+    const key = family + ':' + found.size;
+    if (key !== atlasKey) {
+      atlasKey = key;
+      atlas.update(found, family);
+    }
+  }
+
   const id = v.extent ? identify(S.changes) : null;
   shelfButtons.forEach((b, i) => {
     const on = !!id && id.offset === 0 && id.method === METHODS[i];
@@ -359,6 +382,16 @@ function step(c) {
   }
   flash = null;
   S.changes.push(c);
+
+  // An extent finished by hand is inked in on the plate of 162.
+  if (cat && S.changes.length === LENGTH && o.state === 'home') {
+    found.add(familyOf(cat, S.changes));
+    try {
+      localStorage.setItem(FOUND_KEY, JSON.stringify([...found]));
+    } catch {
+      // kept for this visit only
+    }
+  }
 
   // Ring the row stepped onto. If steps come faster than rows can be rung,
   // let them queue a little, then give up and overlap.
@@ -612,6 +645,14 @@ addEventListener('hashchange', () => {
 render();
 setTimeout(() => {
   cat = new Catalogue();
+  atlas = new Atlas($('atlas'), $('atlas-say'), {
+    cat,
+    onPick: (family) => {
+      S.given = null;
+      load(cat.get(family.first - 1), { thenRing: true });
+      $('solid').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    },
+  });
   if (!fromAddress()) render();
   tower.cast();
 }, 40);

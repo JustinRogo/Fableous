@@ -377,15 +377,23 @@ export class Solid {
         let dy = p.y;
         let reach = 15;
         if (v === here && !bead) {
-          // Where you stand, the ways out crowd round: go where they are not.
-          dx = 0;
-          dy = 0;
-          for (const o2 of NEIGHBOURS[v]) {
-            const q = P[o2];
-            const len = Math.hypot(q.x - p.x, q.y - p.y) || 1;
-            dx -= (q.x - p.x) / len;
-            dy -= (q.y - p.y) / len;
+          // Where you stand, four ways lead out. Find the widest gap between
+          // them and set the name in the middle of it.
+          const angles = NEIGHBOURS[v]
+            .map((n) => Math.atan2(P[n].y - p.y, P[n].x - p.x))
+            .sort((a, b) => a - b);
+          let widest = -1;
+          let mid = Math.PI / 2;
+          for (let i = 0; i < angles.length; i++) {
+            const from = angles[i];
+            const to = i + 1 < angles.length ? angles[i + 1] : angles[0] + 2 * Math.PI;
+            if (to - from > widest) {
+              widest = to - from;
+              mid = (from + to) / 2;
+            }
           }
+          dx = Math.cos(mid);
+          dy = Math.sin(mid);
           reach = v === home ? 31 : 26;
         }
         const len = Math.hypot(dx, dy);
