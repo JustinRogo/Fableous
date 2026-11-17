@@ -40,25 +40,22 @@
     <section class="plate" aria-label="The solid">
       <svg id="solid" role="img" aria-labelledby="solid-title"><title id="solid-title">The twenty-four rows as the corners of a solid. Rows one change apart are joined.</title></svg>
       <div class="changes" id="changes" role="group" aria-label="The four changes"></div>
-      <p class="plate-caption">Step to a joined row, or use a change. Drag to turn the solid.</p>
+      <p class="call" id="call" role="status" aria-live="polite"></p>
+      <div class="actions">
+        <button type="button" id="back" disabled>Step back</button>
+        <button type="button" id="again" disabled>Begin again</button>
+        <button type="button" id="ring" class="primary">Ring it</button>
+      </div>
     </section>
 
     <aside class="margin">
       <p class="premise">Four bells, rung from the lightest down to the heaviest: 1&#8202;2&#8202;3&#8202;4. That order is called <em>rounds</em>. A bell on its wheel is too heavy to hurry, so between one row and the next it can trade places with a neighbour and no more. Ring every order the four can stand in, each once and none twice, and end in rounds again. That is the <em>extent</em>.</p>
-
-      <p class="call" id="call" role="status" aria-live="polite"></p>
 
       <dl class="tally">
         <div><dt>Rows rung</dt><dd><span id="t-rows">1</span> <small>of 24</small></dd></div>
         <div><dt>Extents still open</dt><dd><span id="t-open">&hellip;</span> <small id="t-of">of 10,792</small></dd></div>
       </dl>
       <div class="span" aria-hidden="true"><i id="span"></i></div>
-
-      <div class="actions">
-        <button type="button" id="back" disabled>Step back</button>
-        <button type="button" id="again" disabled>Begin again</button>
-        <button type="button" id="ring" class="primary">Ring it</button>
-      </div>
 
       <div class="settings">
         <label class="pace">Pace
@@ -70,7 +67,6 @@
       <section class="colophon" id="colophon" hidden>
         <p class="number" id="c-number"></p>
         <p class="what" id="c-what"></p>
-        <p class="kin" id="c-kin"></p>
         <form class="naming" id="naming" hidden>
           <label for="name">By custom, the first band to ring a method names it.</label>
           <span class="name-row">
@@ -78,6 +74,7 @@
             <button type="submit">Enter it</button>
           </span>
         </form>
+        <p class="kin" id="c-kin"></p>
         <p class="address"><button type="button" id="copy" class="quiet">Copy the address of this extent</button></p>
       </section>
 

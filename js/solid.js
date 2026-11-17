@@ -98,9 +98,10 @@ const LINK_AT = new Map(LINKS.map((l, i) => [linkKey(l.a, l.b), i]));
 // --- the plate ---------------------------------------------------------------
 
 export class Solid {
-  constructor(svg, { onStep, reducedMotion = false } = {}) {
+  constructor(svg, { onStep, onBack, reducedMotion = false } = {}) {
     this.svg = svg;
     this.onStep = onStep || (() => {});
+    this.onBack = onBack || (() => {});
     this.reducedMotion = reducedMotion;
 
     svg.setAttribute('viewBox', '-262 -262 524 524');
@@ -112,7 +113,7 @@ export class Solid {
     this.target = this.q;
     this.spin = 0; // idle turning, radians per second about the vertical
 
-    this.state = { path: [home], options: [], bead: null, done: false };
+    this.state = { path: [home], options: [], bead: null, done: false, canGoBack: false };
     this.hover = -1;
 
     this.#build();
@@ -204,7 +205,10 @@ export class Solid {
       const row = was.target.dataset && was.target.dataset.row;
       if (row === undefined) return;
       const opt = this.state.options.find((o) => o.to === Number(row));
-      if (opt && opt.state !== 'rung') this.onStep(opt.change);
+      if (opt && opt.state !== 'rung') return this.onStep(opt.change);
+      // The row you just came from: going back the way you came is a step back.
+      const { path, canGoBack } = this.state;
+      if (canGoBack && path.length > 1 && Number(row) === path[path.length - 2]) this.onBack();
     };
     svg.addEventListener('pointerup', end);
     svg.addEventListener('pointercancel', () => {
@@ -293,9 +297,10 @@ export class Solid {
   }
 
   draw() {
-    const { path, options, bead, done } = this.state;
+    const { path, options, bead, done, canGoBack } = this.state;
     const here = path[path.length - 1];
     const home = path[0];
+    const behind = canGoBack && path.length > 1 ? path[path.length - 2] : -1;
     const P = POS.map((p) => this.#project(p));
 
     // Which faces are turned toward the eye.
@@ -397,7 +402,7 @@ export class Solid {
         label.setAttribute('y', (p.y + dy * off + 5).toFixed(1));
         let lc = 'row-label';
         if (v === here && !bead) lc += ' here';
-        else if (o) lc += o.state === 'rung' ? ' shut' : ' open';
+        else if (o && o.state !== 'rung') lc += ' open';
         else if (visited.has(v)) lc += ' rung';
         label.setAttribute('class', lc);
         label.style.opacity = Math.min(1, 0.3 + (facing - 0.08) * 2.2).toFixed(2);
@@ -406,7 +411,7 @@ export class Solid {
       const hit = this.hitEls[v];
       hit.setAttribute('cx', p.x.toFixed(1));
       hit.setAttribute('cy', p.y.toFixed(1));
-      hit.setAttribute('class', 'hit' + (o && o.state !== 'rung' ? ' live' : ''));
+      hit.setAttribute('class', 'hit' + ((o && o.state !== 'rung') || v === behind ? ' live' : ''));
     });
 
     // Rounds wears a ring, always.

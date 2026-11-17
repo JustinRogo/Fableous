@@ -167,6 +167,9 @@ a:hover { text-decoration-color: var(--ink); }
 #solid {
   display: block;
   width: 100%;
+  /* Never so tall that the changes beneath it fall off a laptop screen. */
+  max-width: max(300px, calc(100vh - 404px));
+  margin: 0 auto;
   height: auto;
   aspect-ratio: 1;
   touch-action: pan-y; /* a finger moving up or down scrolls the page; sideways turns the solid */
@@ -209,7 +212,6 @@ a:hover { text-decoration-color: var(--ink); }
 }
 #solid .row-label.rung { fill: var(--ink); }
 #solid .row-label.open { fill: var(--ink); font-size: 17px; }
-#solid .row-label.shut { fill: var(--ink-3); text-decoration: line-through; }
 #solid .row-label.here { fill: var(--red); font-size: 21px; }
 #solid .change-glyph {
   font: italic 15px/1 var(--serif);
@@ -224,13 +226,25 @@ a:hover { text-decoration-color: var(--ink); }
 #solid .hit { fill: transparent; pointer-events: none; }
 #solid .hit.live { pointer-events: all; cursor: pointer; }
 
-.plate-caption {
-  margin: 12px 0 0;
+/* The conductor's line: one sentence under the changes saying where things
+   stand. It sits here, by the instrument, so that on a small screen the
+   solid, the changes, the line and the way back are all in view at once. */
+.call {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.2em;
+  max-width: 30em;
+  margin: 10px auto 8px;
   text-align: center;
-  font-size: 15px;
+  text-wrap: balance;
   font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
   color: var(--ink-2);
 }
+.call.loud { color: var(--ink); }
+.call.warn { color: var(--red); }
 
 /* ---------------------------------------------------------- the changes */
 
@@ -283,18 +297,7 @@ a:hover { text-decoration-color: var(--ink); }
 /* --------------------------------------------------------------- margin */
 
 .margin { font-size: 17px; min-width: 0; }
-.premise { margin: 0 0 16px; }
-
-.call {
-  min-height: 3em;
-  margin: 0 0 14px;
-  padding-left: 12px;
-  border-left: 2px solid var(--red);
-  font-style: italic;
-  font-size: 18px;
-  line-height: 1.5;
-}
-.call:empty { border-left-color: transparent; }
+.premise { margin: 0 0 18px; }
 
 .tally { margin: 0; display: grid; gap: 2px; }
 .tally > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -322,7 +325,7 @@ a:hover { text-decoration-color: var(--ink); }
 .span.none i { width: 0 !important; min-width: 0; }
 .span.one i { background: var(--red); }
 
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .actions button,
 .naming button {
   font: 16px/1 var(--caps);
@@ -347,7 +350,6 @@ a:hover { text-decoration-color: var(--ink); }
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-top: 14px;
   font-size: 15px;
   color: var(--ink-2);
 }
@@ -519,8 +521,9 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
     --ink-3: rgba(0, 0, 0, 0.4);
     --ink-4: rgba(0, 0, 0, 0.18);
   }
-  .changes, .plate-caption, .actions, .settings, .shelf, .premise, .call, .tally, .span,
-  .naming, .address, .art, .foot, .pick { display: none !important; }
+  .changes, .actions, .settings, .shelf, .premise, .call, .tally, .span,
+  .naming, .address, .art, .foot, .colophon button, .pick button[aria-pressed='false'] { display: none !important; }
+  .pick button { border: 0; color: var(--ink-2); }
   .work { grid-template-columns: auto 320px 1fr; gap: 24px; }
   .colophon { border-top: 0; margin-top: 0; padding-top: 0; }
 }

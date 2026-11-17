@@ -38,7 +38,7 @@ const names = (() => {
 })();
 
 const tower = new Tower();
-const solid = new Solid($('solid'), { onStep: (c) => step(c), reducedMotion: reduced });
+const solid = new Solid($('solid'), { onStep: (c) => step(c), onBack: () => back(), reducedMotion: reduced });
 const leaf = new Leaf($('leaf'));
 
 // ---------------------------------------------------------------------------
@@ -76,21 +76,32 @@ function look() {
 const isHunt = (changes) =>
   changes.length === 8 && (changes.every((c, i) => c === i % 2) || changes.every((c, i) => c === 1 - (i % 2)));
 
+// The conductor's line: [what to say, how to say it]. 'warn' is for the
+// moments that want a step back; 'loud' for arrivals.
 function callFor(v) {
-  if (flash) return flash;
-  if (v.extent) return 'That’s all.';
+  if (flash) return [flash, ''];
+  if (v.extent) return [v.number ? `That’s all. No. ${say(v.number)} of ${say(cat.size)}.` : 'That’s all.', 'loud'];
   if (v.round) {
     if (isHunt(S.changes)) {
-      return 'Plain hunt: eight rows, and home. Sixteen were never rung. Step back one, and where the hunt would close, make some other change.';
+      return ['Plain hunt: eight rows, and home, with sixteen never rung. Step back one, and where the hunt would close, make some other change.', 'loud'];
     }
     const left = LENGTH - v.n;
-    return `Came round after ${v.n}. True, but short: ${left} rows were never rung.`;
+    return [`Came round after ${v.n}. True, but short: ${left} rows were never rung.`, 'loud'];
   }
-  if (v.stuck) return 'Every way on leads to a row already rung. Step back.';
-  if (v.open === 0) return 'No extent begins this way. Step back, or go on and see where it runs out.';
-  if (v.n === 0) return 'Look to.';
-  if (v.n === LENGTH - 1) return 'One change from home.';
-  return '';
+  if (v.stuck) return ['Every way on leads to a row already rung. Step back.', 'warn'];
+  if (v.open === 0) return ['No extent begins this way. Step back, or go on and see where it runs out.', 'warn'];
+  if (v.n === 0) return ['Step to a joined row, or use a change. Drag to turn the solid.', ''];
+  if (v.n === LENGTH - 1) return ['One change from home.', 'loud'];
+  if (v.open === null) return [`${v.count} of 24 rows rung.`, ''];
+  if (v.open === 1) return [`${v.count} of 24 rows rung. Only one extent still begins this way.`, ''];
+  return [`${v.count} of 24 rows rung. ${say(v.open)} extents still begin this way.`, ''];
+}
+
+function setCall(text, tone = '') {
+  const el = $('call');
+  setText(el, text);
+  el.classList.toggle('loud', tone === 'loud');
+  el.classList.toggle('warn', tone === 'warn');
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +160,7 @@ function render({ delay = 0, stagger = 0.2 } = {}) {
 
   if (!playing) {
     solid.setSpin(v.extent ? 0.07 : 0);
-    solid.set({ path: v.rows.map((r) => INDEX.get(r)), options: v.options, bead: null, done: v.extent });
+    solid.set({ path: v.rows.map((r) => INDEX.get(r)), options: v.options, bead: null, done: v.extent, canGoBack: v.n > 0 });
   }
 
   // Rule the leaf off wherever the changes start over.
@@ -170,7 +181,7 @@ function render({ delay = 0, stagger = 0.2 } = {}) {
     b.setAttribute('aria-label', `${CHANGES[c].glyph === '×' ? 'Cross' : CHANGES[c].name}: ${CHANGES[c].word}${where}`);
   });
 
-  setText($('call'), callFor(v));
+  if (!playing) setCall(...callFor(v));
   setText($('t-rows'), String(Math.min(v.count, LENGTH)));
   setText($('t-open'), v.open === null ? '…' : say(v.open));
   const span = $('span');
@@ -428,6 +439,7 @@ function ring() {
   perf.raf = requestAnimationFrame(follow);
   render();
   leaf.setPlayhead({ row: 0, strike: -1 });
+  setCall('Look to. Treble’s going. She’s gone.', 'loud');
 }
 
 function schedule() {
@@ -465,7 +477,7 @@ function follow() {
       perf.shown = key;
       leaf.setPlayhead({ row: item.leaf, strike });
       const closing = perf.round && item.leaf === perf.n;
-      setText($('call'), k < 2 ? 'Look to. Treble’s going. She’s gone.' : closing ? 'That’s all.' : '');
+      setCall(k < 2 ? 'Look to. Treble’s going. She’s gone.' : closing ? 'That’s all.' : '', 'loud');
     }
 
     // Between this row and the next, a bead runs along the way taken. It
@@ -476,7 +488,7 @@ function follow() {
       const whole = 4 * beat + (k % 2 ? beat : 0);
       bead = { from: INDEX.get(item.row), to: INDEX.get(nxt.row), t: smooth((into / whole - 0.3) / 0.7) };
     }
-    solid.set({ path: perf.index.slice(0, item.leaf + 1), options: [], bead, done: false });
+    solid.set({ path: perf.index.slice(0, item.leaf + 1), options: [], bead, done: false, canGoBack: false });
   }
   perf.raf = requestAnimationFrame(follow);
 }
@@ -605,4 +617,4 @@ setTimeout(() => {
 }, 40);
 
 // A handle for checking things from the console.
-window.extent = { S, tower, look, step, back, again, ring, stand, load, catalogue: () => cat };
+window.extent = { S, tower, solid, leaf, look, step, back, again, ring, stand, load, catalogue: () => cat };
