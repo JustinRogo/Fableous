@@ -201,13 +201,13 @@ a:hover { text-decoration-color: var(--ink); }
   font: 15px/1 var(--serif);
   letter-spacing: 0.06em;
   text-anchor: middle;
-  fill: var(--ink-3);
+  fill: var(--ink-2);
   stroke: var(--paper);
   stroke-width: 4px;
   stroke-linejoin: round;
   paint-order: stroke;
 }
-#solid .row-label.rung { fill: var(--ink-2); }
+#solid .row-label.rung { fill: var(--ink); }
 #solid .row-label.open { fill: var(--ink); font-size: 17px; }
 #solid .row-label.shut { fill: var(--ink-3); text-decoration: line-through; }
 #solid .row-label.here { fill: var(--red); font-size: 21px; }
@@ -376,6 +376,8 @@ button.quiet:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .colophon .number { font: 24px/1.2 var(--caps); letter-spacing: 0.03em; }
 .colophon .number small { font: italic 15px var(--serif); letter-spacing: 0; color: var(--ink-2); }
 .colophon .what strong { font-weight: 400; font-style: italic; font-size: 20px; }
+.colophon .kin { font-size: 15px; color: var(--ink-2); }
+.colophon .naming { margin-bottom: 12px; }
 .naming label { display: block; font-style: italic; color: var(--ink-2); margin-bottom: 8px; }
 .name-row { display: flex; gap: 8px; }
 .naming input {

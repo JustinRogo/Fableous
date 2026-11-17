@@ -225,8 +225,10 @@ export class Solid {
   set(state, { follow = true } = {}) {
     this.state = { ...this.state, ...state };
     if (follow) {
-      if (this.state.bead) this.#faceBead(this.state.bead);
-      else this.face(this.state.path[this.state.path.length - 1]);
+      const bead = this.state.bead;
+      if (!bead) this.face(this.state.path[this.state.path.length - 1]);
+      else if (this.reducedMotion) this.face(bead.t < 0.5 ? bead.from : bead.to); // cut, don't roll
+      else this.#faceBead(bead);
     }
     this.#wake();
   }
@@ -245,7 +247,14 @@ export class Solid {
     const p = unit([0, 1, 2].map((k) => a[k] + (b[k] - a[k]) * t));
     const now = unit(qrot(this.target, p));
     this.target = qnorm(qmul(qarc(now, FRONT), this.target));
-    if (this.reducedMotion) this.q = this.target;
+  }
+
+  // Point at one of the ways on, from outside: the change buttons do this,
+  // so a button and the way it leads light up together.
+  setHover(row) {
+    if (row === this.hover) return;
+    this.hover = row;
+    this.draw();
   }
 
   setSpin(radPerSec) {

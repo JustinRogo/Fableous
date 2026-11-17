@@ -178,6 +178,23 @@ export function canonical(changes) {
   return best;
 }
 
+// Every extent that is this same loop: begun at any of its 24 rows, rung in
+// either direction, mirrored or not. Up to 96 of them; fewer when the loop
+// has symmetry and some of those come out identical. Returned as change
+// sequences, this one included, without duplicates.
+export function kin(changes) {
+  const seen = new Map();
+  for (const m of [changes, mirror(changes)]) {
+    for (const d of [m, m.slice().reverse()]) {
+      for (let k = 0; k < d.length; k++) {
+        const r = rotate(d, k);
+        seen.set(r.join(''), r);
+      }
+    }
+  }
+  return [...seen.values()];
+}
+
 // ---------------------------------------------------------------------------
 // The eleven.
 //

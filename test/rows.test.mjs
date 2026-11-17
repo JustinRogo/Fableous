@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import {
   ROUNDS, LENGTH, CHANGES, ROWS, INDEX, NEXT, LINKS, FACES, METHODS,
   apply, rowsOf, enumerateExtents, Catalogue, period, mirror, isPalindromic,
-  canonical, identify, position,
+  canonical, identify, position, kin,
 } from '../js/rows.js';
 
 let passed = 0;
@@ -123,6 +123,27 @@ test('162 essentially different, up to start point, direction and mirror', () =>
   const classes = new Set();
   for (let n = 0; n < cat.size; n++) classes.add(canonical(cat.get(n)));
   assert.equal(classes.size, 162);
+});
+
+test('kin: every relative is itself an extent, and the families tile the catalogue', () => {
+  const sizes = new Map();
+  let total = 0;
+  const done = new Uint8Array(cat.size);
+  for (let n = 0; n < cat.size; n++) {
+    if (done[n]) continue;
+    const family = kin(cat.get(n));
+    for (const k of family) {
+      const at = cat.indexOf(k);
+      assert.ok(at >= 0, 'a relative of ' + n + ' is not an extent');
+      assert.equal(done[at], 0);
+      done[at] = 1;
+    }
+    total += family.length;
+    sizes.set(family.length, (sizes.get(family.length) || 0) + 1);
+  }
+  assert.equal(total, cat.size);
+  assert.equal([...sizes.values()].reduce((a, b) => a + b, 0), 162);
+  console.log('         family sizes: ' + [...sizes].sort((a, b) => a[0] - b[0]).map(([s, c]) => c + ' of ' + s).join(', '));
 });
 
 console.log('the eleven');

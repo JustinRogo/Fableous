@@ -3,7 +3,7 @@
 
 import {
   ROUNDS, LENGTH, CHANGES, INDEX, METHODS,
-  apply, rowsOf, Catalogue, period, isPalindromic, identify,
+  apply, rowsOf, Catalogue, period, isPalindromic, identify, kin,
 } from './rows.js';
 import { Solid } from './solid.js';
 import { Leaf } from './leaf.js';
@@ -113,6 +113,15 @@ const changeButtons = CHANGES.map((c) => {
   b.innerHTML = `${diagram(c)}<span class="glyph">${c.glyph}</span><span class="to"></span><kbd>${c.key}</kbd>`;
   b.addEventListener('click', () => step(c.id));
   b.addEventListener('animationend', () => b.classList.remove('refuse'));
+  // Pointing at a change points at the way it leads on the solid.
+  const point = (on) => () => {
+    const o = on && !perf ? look().options.find((x) => x.change === c.id) : null;
+    solid.setHover(o && o.state !== 'rung' ? o.to : -1);
+  };
+  b.addEventListener('pointerenter', point(true));
+  b.addEventListener('pointerleave', point(false));
+  b.addEventListener('focus', point(true));
+  b.addEventListener('blur', point(false));
   $('changes').append(b);
   return b;
 });
@@ -230,22 +239,73 @@ function colophon(v) {
     if (mine) {
       strong(`${mine.name} Minimus`);
       what.append(`. ${shape} ${mine.whose === 'you' ? 'So named by you.' : 'So named by whoever sent you here.'}`);
+      if (mine.whose === 'you') {
+        const again = document.createElement('button');
+        again.type = 'button';
+        again.className = 'quiet';
+        again.textContent = 'Rename it';
+        again.addEventListener('click', () => {
+          delete names[v.number];
+          keepNames();
+          render();
+          $('name').focus();
+        });
+        what.append(' ', again);
+      }
     } else {
       what.append(`${shape} This page knows no name for it.`);
       nameable = true;
     }
   }
   $('naming').hidden = !nameable;
+
+  // Its family: the extents that are this same loop, differently begun.
+  const family = kin(S.changes).map((k) => cat.indexOf(k) + 1);
+  const first = Math.min(...family);
+  const others = family.length - 1;
+  const kinEl = $('c-kin');
+  kinEl.replaceChildren(
+    `${others} others are this same loop, begun at another row, rung backwards, or mirrored front to back. `
+  );
+  if (first === v.number) {
+    kinEl.append('This is the first of them.');
+  } else {
+    const go = document.createElement('button');
+    go.type = 'button';
+    go.className = 'quiet';
+    go.textContent = `No. ${say(first)}`;
+    go.addEventListener('click', () => {
+      S.given = null;
+      load(cat.get(first - 1), { thenRing: false });
+    });
+    kinEl.append('The first of them is ', go, '.');
+  }
+}
+
+function keepNames() {
+  try {
+    localStorage.setItem(NAMES_KEY, JSON.stringify(names));
+  } catch {
+    // private windows may refuse; the name still holds for this visit and in the address
+  }
 }
 
 // A finished extent has an address: its number, and its name if it has one
 // of yours. Anything else has none.
 function address(v) {
+  // Until the catalogue is counted, an address someone arrived with has not
+  // been read yet. Leave it alone.
+  if (!cat) return;
   let hash = '';
+  let title = 'Extent · all the changes on four bells';
   if (v.extent && v.number) {
-    const mine = nameOf(v.number);
+    const id = identify(S.changes);
+    const mine = id ? null : nameOf(v.number);
     hash = '#' + v.number + (mine ? ':' + encodeURIComponent(mine.name) : '');
+    const label = id && id.offset === 0 ? `${id.method.name} Minimus` : mine ? `${mine.name} Minimus` : `No. ${say(v.number)}`;
+    title = `${label} · Extent`;
   }
+  if (document.title !== title) document.title = title;
   if (location.hash !== hash) {
     try {
       history.replaceState(null, '', hash || location.pathname + location.search);
@@ -490,11 +550,7 @@ $('naming').addEventListener('submit', (e) => {
   const name = $('name').value.replace(/\s+/g, ' ').trim().slice(0, 40);
   if (!v.number || !name) return;
   names[v.number] = name;
-  try {
-    localStorage.setItem(NAMES_KEY, JSON.stringify(names));
-  } catch {
-    // private windows may refuse; the name still holds for this visit and in the address
-  }
+  keepNames();
   $('name').value = '';
   render();
 });
@@ -532,7 +588,9 @@ addEventListener('keydown', (e) => {
 addEventListener('hashchange', () => {
   const v = look();
   const mine = v.number ? '#' + v.number : '';
-  if (location.hash.split(':')[0] !== mine) fromAddress();
+  if (location.hash.split(':')[0] === mine) return;
+  // An address that names no extent is put back to what is on the page.
+  if (!fromAddress()) render();
 });
 
 // ---------------------------------------------------------------------------
