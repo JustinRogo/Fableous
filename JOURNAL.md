@@ -128,3 +128,22 @@ them as true.
   and the 40,320 at Loughborough on 27 July 1963 in 17h58: the Central Council
   of Church Bell Ringers' [history](https://cccbr.org.uk/peal-performance/?id=5)
   [pages](https://cccbr.org.uk/peal-performance/?id=14).
+
+## 5. Where this stands (interrupted)
+
+Work stopped here partway, on a usage limit, so this entry is a handover
+note rather than a reflection.
+
+Written and tested: `js/rows.js` (the arithmetic, the catalogue, the eleven,
+the solid's coordinates) with 21 passing checks in `test/rows.test.mjs`.
+
+Written but never yet run in a browser: `js/solid.js` (the truncated
+octahedron as an SVG plate that turns under you, near faces veiling the far
+side) and `js/leaf.js` (the rows set down the page with the red and blue
+lines). Treat both as drafts.
+
+Not yet written: `index.html`, `css/style.css`, `js/main.js` (state, the
+reactive notes, the count of extents still open, the URL hash), and
+`js/audio.js` (bells built from sine partials, rendered once per bell, with
+the handstroke gap). Nothing has been seen or heard yet, so nothing here is
+polished.
